@@ -77,15 +77,15 @@ class Encoder
 {
 public:
 	Encoder(uint8_t pin1, uint8_t pin2) {
-		#ifdef INPUT_PULLUP
-		pinMode(pin1, INPUT_PULLUP);
-		pinMode(pin2, INPUT_PULLUP);
-		#else
+		//#ifdef INPUT_PULLUP
 		pinMode(pin1, INPUT);
-		digitalWrite(pin1, HIGH);
 		pinMode(pin2, INPUT);
-		digitalWrite(pin2, HIGH);
-		#endif
+		//#else
+		//pinMode(pin1, INPUT);
+		//digitalWrite(pin1, HIGH);
+		//pinMode(pin2, INPUT);
+		//digitalWrite(pin2, HIGH);
+		//#endif
 		encoder.pin1_register = PIN_TO_BASEREG(pin1);
 		encoder.pin1_bitmask = PIN_TO_BITMASK(pin1);
 		encoder.pin2_register = PIN_TO_BASEREG(pin2);
@@ -100,15 +100,29 @@ public:
 		if (DIRECT_PIN_READ(encoder.pin2_register, encoder.pin2_bitmask)) s |= 2;
 		encoder.state = s;
 #ifdef ENCODER_USE_INTERRUPTS
-		interrupts_in_use = attach_interrupt(pin1, &encoder);
-		interrupts_in_use += attach_interrupt(pin2, &encoder);
+interrupts_initialized = false;
+    interrupt_pin1 = pin1;
+    interrupt_pin2 = pin2;
+
+//		interrupts_in_use = attach_interrupt(pin1, &encoder);
+//		interrupts_in_use += attach_interrupt(pin2, &encoder);
 #endif
 		//update_finishup();  // to force linker to include the code (does not work)
 	}
 
-
+void begin(void)
+{
+  #ifdef ENCODER_USE_INTERRUPTS
+interrupts_in_use = attach_interrupt(interrupt_pin1, &encoder);
+    interrupts_in_use += attach_interrupt(interrupt_pin2, &encoder);
+    interrupts_initialized = true;
+    #endif
+}
 #ifdef ENCODER_USE_INTERRUPTS
 	inline int32_t read() {
+  if (!interrupts_initialized) {
+  begin();
+  }
 		if (interrupts_in_use < 2) {
 			noInterrupts();
 			update(&encoder);
@@ -136,6 +150,7 @@ public:
 		encoder.position = p;
 		interrupts();
 	}
+ 
 #else
 	inline int32_t read() {
 		update(&encoder);
@@ -151,10 +166,16 @@ public:
 		encoder.position = p;
 	}
 #endif
+
 private:
 	Encoder_internal_state_t encoder;
+ 
 #ifdef ENCODER_USE_INTERRUPTS
 	uint8_t interrupts_in_use;
+  uint8_t interrupts_initialized;
+  uint8_t interrupt_pin1;
+  uint8_t interrupt_pin2;
+  
 #endif
 public:
 	static Encoder_internal_state_t * interruptArgs[ENCODER_ARGLIST_SIZE];

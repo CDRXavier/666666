@@ -27,28 +27,35 @@
 
 Encoder EncX(1, 0);
 Encoder EncY(2, 5);
-//Encoder EncZ(8, 9);
-//Encoder EncRX(11, 10);
-//Encoder EncRY(12, 13);
+Encoder EncZ(8, 9);
+Encoder EncRX(11, 10);
+Encoder EncRY(12, 13);
 //Encoder EncRZ(6, 7);
 
 void setup() {
-
-  delay(1000);
   SerialUSB.begin(9600);
-
   SerialUSB.print("hello");
+  //  pinMode(0, INPUT);
+  //  pinMode(1, INPUT);
+  //  pinMode(2, INPUT);
+  //  pinMode(8, INPUT);
+  //  pinMode(9, INPUT);
+  //  pinMode(10, INPUT);
+  //  pinMode(11, INPUT);
+  //  pinMode(12, INPUT);
+  //  pinMode(13, INPUT);
+  //  pinMode(6, INPUT);
+  //  pinMode(7, INPUT);
 
-  pinMode(0, INPUT_PULLUP);
-  pinMode(1, INPUT_PULLUP);
-  pinMode(2, INPUT_PULLUP);
-  pinMode(5, INPUT_PULLUP);
-  //        pinMode(8, INPUT_PULLUP);
-  //    pinMode(9, INPUT_PULLUP);
-  //        pinMode(10, INPUT_PULLUP);
-  //    pinMode(11, INPUT_PULLUP);
-  //        pinMode(12, INPUT_PULLUP);
-  //    pinMode(13, INPUT);
+  EncX.begin();
+  EncY.begin();
+  //not using native pullups because of noisy lines
+  //  pinMode(8, INPUT_PULLUP);
+  //  pinMode(9, INPUT_PULLUP);
+  //  pinMode(10, INPUT_PULLUP);
+  //  pinMode(11, INPUT_PULLUP);
+  //  pinMode(12, INPUT_PULLUP);
+  //  pinMode(13, INPUT_PULLUP);
 }
 short posX = 0;
 short posY = 0;
@@ -67,46 +74,33 @@ short nPosRY = 0;
 void loop() {
   nPosX = EncX.read();
   nPosY = EncY.read();
-  //  nPosX = EncZ.read();
-  //  nPosRX = EncRX.read();
-  //  nPosRY = EncRY.read();
+  nPosZ = EncZ.read();
+  nPosRX = EncRX.read();
+  nPosRY = EncRY.read();
 
   if ((posX != nPosX) || (posY != nPosY) || (posZ != nPosZ) || (posRX != nPosRX) || (posRY != nPosRY)) {
-    if (posX != nPosX) {
+    if (posX != nPosX)
       posX = nPosX;
-      SerialUSB.print(' ');
-      SerialUSB.print(nPosX);
-    }
-    else
-      SerialUSB.print("  ");
-    if (nPosY != posY) {
+    SerialUSB.print(nPosX);
+    SerialUSB.print(' ');
+    if (nPosY != posY)
       posY = nPosY;
-      SerialUSB.print(' ');
-      SerialUSB.print(nPosY);
-    }
-    else
-      SerialUSB.print("  ");
-    if (posZ != nPosZ) {
+    SerialUSB.print(nPosY);
+    SerialUSB.print(' ');
+    if (posZ != nPosZ)
       posZ = nPosZ;
-      SerialUSB.print(' ');
-      SerialUSB.print(nPosX);
-    }
-    else
-      SerialUSB.print("  ");
-    if (posRX != nPosRX) {
+    SerialUSB.print(nPosZ);
+    SerialUSB.print(' ');
+    if (posRX != nPosRX)
       posRX = nPosRX;
-      SerialUSB.print(' ');
-      SerialUSB.print(nPosX);
-    }
-    else
-      SerialUSB.print("  ");
-    if (nPosRY != posRY) {
+    SerialUSB.print(nPosRX);
+    SerialUSB.print(' ');
+
+    if (nPosRY != posRY)
       posRY = nPosRY;
-      SerialUSB.print(' ');
-      SerialUSB.print(nPosY);
-    }
-    else
-      SerialUSB.print("  ");
+    SerialUSB.print(nPosRY);
+    SerialUSB.print(' ');
     SerialUSB.println();
   }
+
 }
